@@ -1,0 +1,137 @@
+---
+title: Cubit建模
+date: 2025-4-27
+tags: ['Python','Cubit','FEM']
+summary: '使用Cubit建模的简单概念和方法'
+---
+
+# 1 Cubit简介
+
+`Cubit`是一个强大的三维网格生成和有限元建模软件，广泛应用于计算机辅助工程（`CAE`）和数值模拟领域。它提供了丰富的功能和工具，使用户能够创建复杂的几何体、生成高质量的网格，并进行有限元分析。`Cubit`支持多种网格类型，包括四面体、六面体、三角形和四边形等，适用于各种工程应用，如结构分析、流体动力学和热传导等。通过其直观的图形用户界面和`Python`脚本编程接口，用户可以轻松地定义几何体、设置边界条件，并导出网格数据以供后续分析使用。
+
+`Cubit`的灵活性和可扩展性使其成为工程师和研究人员进行数值模拟和优化设计的重要工具。它在学术界和工业界都得到了广泛应用，成为有限元分析领域的标准软件之一。通过使用`Cubit`，用户可以提高建模效率、减少计算时间，并获得更准确的分析结果。
+
+## 1.1 gui界面
+
+![gui图](https://imgur.com/HusQRGT.png)
+
+如图所示：Cubit界面主要分为5个部分，功能繁多。在此主要介绍几个常用的功能。
+
+- 1：`current view`选择元素的集合，可以选择surface, volume等element；
+- 2：工具栏主要用于打开脚本、调整视图、选择元素等操作；
+- 3：视窗窗口，可以调整视角，配合工具栏，可以点选元素id。配合`ctrl`键多选；
+- 4：`command window`命令窗口，输入命令的地方。常用命令有：`list vertex [id]`、`reset`等；
+- 5：命令栏导航。前两个是解释器选项，可选jou语言和python语言；
+
+## 1.2 脚本语言类型
+
+`Cubit`支持两种脚本语言：`Jou`和`Python`。其中，`Jou`是`Cubit`的原生脚本语言。而`Python`则是更为通用的编程语言。我个人一般喜欢使用`Python`，因为它能够自由编写数据处理的代码，可以简单引入例如`numpy`、`pandas`等库。
+
+这两种语言的语法其实并没有什么差异，只是在jou的指令上加入`cubit.cmd("jou grammar")`。其中，
+
+需要注意的是，Cubit是使用它自带的python解释器，而不是系统的python解释器。所以运行python脚本需要在`gui 5`中选择python解释器。如果你想要安装其他的python库，可以在`cubit`的安装目录下找到python解释器，然后使用以下命令安装库：
+
+```bash:cmd
+C:\Python39\python.exe -m pip install 库名
+```
+
+将`C:\Python39\python.exe`改成你安装的Cubit目录下的python解释器路径。你也可以自行创建一个虚拟环境，指定python解释器的路径，或者将该解释器路径加入到系统环境变量中。但这些方法我认为都太麻烦了。我个人是直接指定解释器路径安装第三方库。
+
+# 2 Cubit基本概念
+
+![基本概念](https://imgur.com/gSHRVvo.png)
+
+如上图所示，Cubit中，`Entity`是 :
+
+> The base class of all the geometry and mesh types.
+
+也就是说，Cubit中的所有几何体和网格类型都属于`Entity`类。其中，`GeomEntity`又可以分为以下五类：
+- `Vertex`：点，表示几何体的顶点；
+- `Curve`：线，表示几何体的线；
+- `Surface`：面，表示几何体的面；
+- `Volume`：体，表示几何体的体；
+- `body`：网格，表示几何体的体；
+
+其中，`body`和`volume`之间的区别我不是很清楚，或许`body`可以含有多个`volume`吧。
+
+通常我们在建模时，首先创建`Vertex`，然后点连成`Curve`，线拓展成`Surface`，面组成`Volume`。所以，一个模型的精度和计算复杂度主要取决于`Vertex`的数量和后续网格划分的大小。
+
+除此之外，我们还需要明白一点：`Cubit`中指定对象靠的是指定对象的`id`。而不是像其他软件一样，直接选择对象。也就是说，`Cubit`中所有的对象都是有`id`的。所以我们需要时刻关注`id`的变化。
+
+# 3 Cubit常用命令
+
+1. 直接在指令栏中使用：
+- `reset`：重置当前模型，清空所有元素；
+- `list vertex [id]`：列出当前指定id的`Vertex`信息；
+- `list curve [id]`：列出当前指定id的`Curve`信息；
+- `list surface [id]`：列出当前指定id的`Surface`信息
+
+2. 在脚本中使用：
+```py:jou_2D.py
+# 创建点
+cubit.create_vertex(x, y, z)
+
+# 创建线
+# 建议只使用spline创建线，spline创建的线不会打乱vertex的id。
+# 但是如果使用spline创建多段线，会自动创建曲线。
+# 因此想要创建多段直线，建议一条一条用spline创建。
+
+## spine
+## 两点
+cubit.cmd(f"create curve spline vertex {point1.id()} {point2.id()}")
+## 多点
+cubit.cmd(f"create curve spline vertex {point1.id()} to {point4.id()}")
+
+## polyline 多段直线
+cubit.cmd(f"create curve polyline vertex {point1.id()} to {point4.id()}")
+
+# 分割线
+# 将一条线分割成两段线，需要两条线相交。
+cubit.cmd("split curve A crossing curve B")
+
+
+# 创建面
+# 需要 curve 1 2 3 4 组成一个闭合的面。
+cubit.cmd("create surface curve 1 2 3 4")
+
+# 创建block
+cubit.cmd("block 1 surface 1 2")
+cubit.cmd("block 1 name 'xxx'")
+
+# 创建nodesets
+# 想要创建group，再依据group创建nodeset，依据需要可以选择是否删除node
+cubit.cmd("group 'groundsurf' add node in curve 1")
+cubit.cmd("group 'groundsurf' remove node in curve 2")
+cubit.cmd("nodeset 20 group groundsurf")
+cubit.cmd("nodeset 20 name 'groundsurf'")
+
+```
+
+# 4 Cubit建模中的注意事项
+
+- `Pylith`中，材料指定的是Cubit中的`block`，边界和断层指定的是`nodeset`。
+
+- 创建边界条件`nodesets`时，需要注意`dof`，即自由度。如果两个边界点集有交点，又在两个边界同时限定该交点的同一个自由度，那么就会报错。所以在创建`nodeset`时，如果有自由度冲突，就`cubit.cmd("group 'groundsurf' remove node in curve 2")`,将冲突的节点删除,只保留一个边界有该点即可。
+
+- 三维建模中，创建断层面时，如果断层面是在块体内部的话，此时使用`imprint`命令没有效果。需要先使用`webcut`命令，将悬浮在块体内的断层面延伸切断整个块体。这样`imprint`才能生效。这其中还有一个细节，如果你的断层面是一个90°的垂直断层，那么你imprint的时候需要刻印的是`volume`，而断层如果是非垂直的，那么你需要刻印的是`surface`。如下：
+
+```py:jou_3D.py
+# 垂直断层
+cubit.cmd(f"webcut volume xxx_id with sheet extended from surface fault_id")
+cubit.cmd(f"imprint volume {xxx_ids} with curve {fault_curve_ids}")
+
+# 非垂直断层
+cubit.cmd(f"webcut volume xxx_id with sheet extended from surface xxx_fault_id")
+cubit.cmd(f"imprint surface xxx_fault.id with curve xxx_ids")
+```
+
+# 5 总结建模步骤
+
+1. 创建点
+2. 创建线
+3. 创建面
+4. 创建块体(3D)
+5. imprint、merge
+6. 网格化
+7. 创建blocks
+8. 创建nodesets

@@ -1,0 +1,316 @@
+---
+title: 如何搭建博客
+date: 2025-04-25
+tags: ['Next.js','React','Tailwind','Mdx','mdx-bundler','JavaScript']
+summary: '关于我是如何搭建博客的历程，和一些构建博客的技术选型'
+---
+
+# 1 为什么要搭建博客
+
+我个人在学习的过程中，喜欢记录笔记，这是因为我觉得记录笔记是一个很好的学习方式。通过记录笔记，我可以更好地理解和消化所学的知识，同时也可以在以后的学习中方便地查阅和复习。
+
+起初我是使用纸质笔记，但是随着时间的推移，我发现纸质笔记的查找和整理都很麻烦。于是我购买`ipad`和apple pencil，开始使用数字笔记。最常使用的软件是`Noteability`和`OneNote`。这两者各有千秋，Noteability配合apple pencil使用非常流畅。OneNote则是可以在不同设备上同步，结合学校提供的oneDrive学生账号使用非常方便。
+
+但是以上笔记形式有几个问题：
+
+1. 不能快速检索想要的内容
+2. 不能实现代码高亮
+3. 毕业后会失去学校提供的OneDrive账号
+
+因此我决定搭建一个属于自己的博客。而这个想法的起源是,我在B站上浏览到一个up主对于笔记记录的[分享视频](https://www.bilibili.com/video/BV1BE411o7jE/?spm_id_from=333.1387.search.video_card.click&vd_source=ed7b79653b10dc72f584e03a7159ad61)。
+
+# 2 技术选型
+
+我了解过构建博客的几种方式：
+- csdn、知乎、掘金等平台
+- `github pages` 和 `Hexo`
+- `Next.js`结合`vercel`
+
+最后我选择了`Next.js`结合`vercel`。原因如下：
+- `Next.js`是一个基于React的框架，有文件系统路由和开箱即用的SSR(服务端渲染)功能，适合构建博客。
+- `vercel`是一个免费的云平台，支持静态网站和动态网站的托管，使用方便
+- 只关注内容创建而不需要复杂的状态管理
+
+而对于博客文章的编写，我选择了`mdx`。mdx相对于markdown的优势在于：可以在markdown中使用JSX语法，方便插入组件和交互式内容。Next.js对mdx的支持也很好，使用起来非常方便。对于转译mdx的工具，我选择了`mdx-bundler`。它可以将mdx文件转译成React组件，并能够接入自定义插件，支持代码高亮等功能。其实`next-mdx-remote`也可以实现类似的功能，但是`mdx-bundler`是我接触的第一个转译工具，所以我选择了它。
+
+在[他人博客](https://www.xiaogenban1993.com/blog/24.06/%E6%88%91%E7%9A%84%E5%8D%9A%E5%AE%A2%E7%BD%91%E7%AB%99%E6%98%AF%E5%A6%82%E4%BD%95%E6%90%AD%E5%BB%BA%E7%9A%84)中有提到他选择`mdx-bundler`的原因，但是我并没有实际比对过其他的转译工具，所以不做评价。
+
+选择了Next.js和mdx-bundler后，我还需要选择一个UI框架。我选择了[`Tailwind CSS`](https://www.tailwindcss.cn/)。它是一个功能强大的CSS框架，提供了丰富的组件和样式，可以快速构建响应式网站。还有[`Antd`](https://ant-design.antgroup.com/index-cn)，这是一个组件种类十分丰富、使用方法易懂的组件库。
+
+最后还有一些小功能，例如代码高亮样式库、图床网站、图标库、评论组件和搜索组件等。都能在我的[github仓库](https://github.com/Ultrafollow/notebookBlog)中找到。
+
+# 3 路由结构
+
+<TreeWrapper
+    treeData={[
+        {
+            title: 'app',
+            key: '0-0',
+            children: [
+
+            { title: 'about', key: '0-0-0', children:[
+                {title: 'page.js', key: '0-0-0-0', isLeaf: true },
+            ] },
+
+            { title: 'blog', key: '0-0-1', children:[
+                {title: '[category]\\[slug]', key: '0-0-1-0', children:[
+                    {title: 'page.js', key:'0-0-1-0-0', isLeaf: true },
+                    {title: 'layout.js', key:'0-0-1-0-1', isLeaf: true },
+                ] },
+                {title: 'page\\[page]', key:'0-0-1-1', children:[
+                    {title: 'page.js', key:'0-0-1-1-0', isLeaf: true },
+                ] },
+                {title: 'page.js', key:'0-0-1-1-1', isLeaf: true },
+            ] },
+
+            {title: 'page.js', key:'0-0-2', isLeaf: true },
+
+            {title: 'layout.js', key:'0-0-3', isLeaf: true },
+
+            ],
+        },
+        ]}
+/>
+
+正如以上目录结构，`app`目录下的`page.js`是一个特殊的文件，它是Next.js的约定文件，用于定义路由和页面。`layout.js`也是一个特殊的文件，用于定义布局和样式。`page.js`和`layout.js`的组合可以实现页面的嵌套和布局。
+
+我的博客主要的功能就是记录笔记，我将笔记的内容放在`blog`目录下的`[category]\[slug]`，这个路径是个动态路由，用于匹配不同的文章和页面。category是文章的分类，slug是文章的标题。这样可以实现对文章的分类和管理。而`page\[page]`是一个静态路由，用于匹配不同的页面页码。`blog\page.js`主要用于罗列文章，以及实现搜索功能。`blog\about`是关于我个人信息的页面。
+
+最核心的功能是`blog\[category]\[slug]\page.js`内的mdx转译和渲染。由于浏览器不能够渲染mdx语言，所以我们需要使用`mdx-bundler`将mdx转译成React组件。然后在页面中渲染这个组件。
+
+# 4 项目脚手架搭建和配置文件
+
+在Next.js[官网文档](https://www.nextjs.cn/learn/basics/create-nextjs-app/setup)中有详细搭建脚手架的步骤。
+
+由于我是2025年4月开始搭建的博客，所以使用的是`Next.js 15`版本。
+
+```bash
+npx create-next-app@latest my-blog
+```
+运行以上命令之后，会弹出一个交互式的命令行界面，要求你选择一些选项。
+
+我第一次接触的编程语言是Python，它没有变量类型的声明，所以我个人是比较喜欢使用JavaScript。也因此在搭建脚手架时，我选择了`JavaScript`。
+
+接着我勾选了`app路由`、`ESlint`、`Tailwind CSS`。这里值得一提的是，一开始我勾选了`Turbopack`，但是在实际使用过程中，它频繁报错，而且`vercel`build的过程中默认使用的是`webpack`，所以我改用了后者。
+
+创建完项目脚手架后，我们进入项目根目录`my-blog`,对以下文件进行修改：
+
+```js:next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  webpack: (config) => {
+    // 添加 SVG 处理规则
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack']
+    });
+    return config;
+  },
+  images: {
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;"
+  }
+}
+ 
+module.exports = (nextConfig)
+```
+
+以上配置文件的作用是：
+
+- 允许在生产环境中忽略ESlint错误
+- 添加SVG处理规则
+- 允许使用SVG图片，并设置内容安全策略
+
+为什么要在生产环境中忽略ESlint错误？因为在build的过程中，ESlint会检查代码的规范性，如果有错误会导致build失败。而我在开发过程中缺少经验，使用了许多不规范的代码形式，导致build失败。选择忽略ESlint错误，能够使得build成功进行下去。
+
+如果项目中需要用到SVG图片，并希望SVG图片能够被作为组件使用，那么就需要添加SVG处理规则。
+
+```js:example_svg.js
+import NextJsIcon from '@/icon/nextjs-fill.svg';
+<NextJsIcon className="h-5 w-5 text-gray-800 dark:text-gray-100 transition-colors" />
+```
+
+再就是样式文件的配置：
+
+```js:tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors')
+const { fontFamily } = require('tailwindcss/defaultTheme')
+
+module.exports = {
+    // tailwind css 能够作用的文件路径
+    content: [
+        "./app/**/*.{js,ts,jsx,tsx}",
+        "./components/**/*.{js,ts,jsx,tsx}",
+        './pages/**/*.{js,ts,tsx}',
+        "./content/**/*.{md,mdx}",
+        './Layouts/**/*.{js,ts,tsx}',
+      ],
+    darkMode: 'class',
+    theme: {
+      extend: {
+        ...加入你的自定义配置
+        }
+    }
+}    
+```
+
+```css:globals.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* 加入你的自定义样式 */
+```
+
+最后还有简化路径的配置：
+
+```js:jsconfig.json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+至此，大致的项目脚手架搭建完成。
+
+# 5 核心功能
+
+## 5.1 mdx转译
+
+在`app\blog\[category]\[slug]\page.js`中，我们需要使用`mdx-bundler`将mdx文件转译成React组件。具体的代码如下：
+
+```js:app\blog\\[category]\\[slug]\\page.js
+const { code } = await bundleMDX({
+    source: mdxSource, // mdx文件的内容
+    cwd:path.join(process.cwd(), 'app', 'components', 'Plugins'), // 自定义插件的路径
+    mdxOptions: (options, frontmatter) => {
+    options.remarkPlugins = [...(options.remarkPlugins ?? []), ...[你想加入的插件]]
+    options.rehypePlugins = [...(options.rehypePlugins ?? []), ...[
+        你想加入的插件
+    ]]
+    return options
+    },
+    esbuildOptions: options => {
+    options.outdir = path.join(process.cwd(), 'public')
+    options.write = true
+    return options
+    }
+})
+
+return {
+    code,
+    frontmatter: {
+    ...post,
+    date: post.date,
+    }
+}
+
+...
+
+const MDXComponent = getMDXComponent(code)
+
+<MDXComponent components={{
+            自定义组件
+          }}/>
+```
+
+首先配置好转译器`bundleMDX`，然后使用`getMDXComponent`将mdx文件转译成React组件，最后在页面中渲染这个组件。
+
+## 5.2 搜索功能
+
+在`app\blog\page.js`中，我们需要实现搜索功能。具体的代码如下：
+
+```js
+export default function ListLayout({
+  posts,          // 全部原始文章数据（始终基于完整数据集）
+  initialDisplayPosts = [],  // 初始分页数据
+  pagination,
+  title
+}) {
+  const [isLoading, setIsLoading] = useState(true)
+  const [searchValue, setSearchValue] = useState('')
+  const [selectedTags, setSelectedTags] = useState([])
+	  
+  useEffect(() => {
+    // 数据加载完成后关闭加载状态
+    setIsLoading(false)
+  }, [posts]) // 当 posts 数据变化时触发
+
+  // 标签点击处理（每次点击都基于完整数据集重新筛选）
+  const handleTagClick = (tag) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)  // 移除标签
+        : [...prev, tag]               // 添加标签
+    )
+  }
+
+  const filteredPosts = posts.filter(post => {
+
+    const tagMatch = selectedTags.length === 0 || 
+      selectedTags.every(tag => post.tags?.includes(tag))
+    
+    const searchMatch = (post.title + (post.summary || '') + (post.category || '') + (post.tags || ''))
+      .toLowerCase()
+      .includes(searchValue.toLowerCase())
+
+    return tagMatch && searchMatch
+  })
+}
+
+...
+<span
+key={tag}
+className={`rounded-lg px-3 py-1 text-sm font-medium cursor-pointer transition-colors
+        ${
+            selectedTags.includes(tag)
+            ? 'bg-primary-400 text-white dark:bg-primary-300 dark:text-gray-900'
+            : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-primary-600 dark:text-primary-300'
+        }`}
+onClick={(e) => {
+    e.stopPropagation() // 阻止事件冒泡
+    handleTagClick(tag)
+}}
+>
+{tag}
+</span>
+```
+
+搜索的逻辑是：根据文章`title`、`summary`、`category`和`tags`进行搜索。使用`useState`和`useEffect`来管理搜索状态和加载状态。使用`filter`方法对文章进行筛选。并且给tags一个点击按钮，能够让用户点击标签得到含有该标签的所有文章。
+
+## 5.3 代码高亮
+
+我选用prismjs及其样式文件。首先从[仓库](https://github.com/PrismJS/prism-themes/tree/master/themes)中选择一个你喜欢的代码高亮样式文件，引入到你的项目中。然后注册代码语言，这样代码就能高亮显示。
+
+```js:layout.js
+import '@/app/prism-dracula.css'
+```
+```js:lib.js
+import { refractor } from 'refractor' 
+import js from 'refractor/lang/javascript'
+import py from 'refractor/lang/python'
+import css from 'refractor/lang/css'
+import bash from 'refractor/lang/bash'
+import json from 'refractor/lang/json'
+import sql from 'refractor/lang/sql'
+
+export function registerPrismLanguages() {
+  // 注册所有需要的语言
+    refractor.register(js)
+    refractor.register(py)
+    refractor.register(css)
+    refractor.register(bash)
+    refractor.register(json)
+    refractor.register(sql)
+}
+```
+```js:page.js
+import { registerPrismLanguages } from '@/app/lib/lib.js'
+registerPrismLanguages()
+```
