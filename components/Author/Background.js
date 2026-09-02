@@ -119,12 +119,9 @@ function TimelineItem({ exp, last }) {
               <div className="line-clamp-1 text-xs tabular-nums text-gray-500 dark:text-gray-400">
                 <span>{start}</span> – <span>{end}</span>
               </div>
-              <Link
-                href={url}
-                className="line-clamp-1 w-fit font-semibold text-gray-900 no-underline hover:text-gray-900 dark:text-white dark:hover:text-white"
-              >
-                <GrowingUnderline>{org}</GrowingUnderline>
-              </Link>
+              <span className="line-clamp-1 w-fit font-semibold text-gray-900 dark:text-white">
+                {org}
+              </span>
               <div className="flex items-center gap-1 pt-1 text-sm text-gray-700 dark:text-gray-200">
                 <Twemoji emoji={icon} className="!-mt-1" />
                 <span>{title}</span>

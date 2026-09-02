@@ -59,6 +59,8 @@ export default function ApplyPermissionModal({ userId, accessToken }) {
                 </label>
                 <label className="block mb-1 text-gray-700 dark:text-gray-200">申请理由</label>
                 <textarea
+                  id="applyReason"
+                  name="applyReason"
                   className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
                   rows={3}
                   value={applyReason}

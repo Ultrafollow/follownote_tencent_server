@@ -49,15 +49,13 @@ export default async function WebAuth() {
       <details className="cursor-pointer">
         {/* 触发区域（头像） */}
         <summary 
-          className="list-none" // 隐藏默认下拉箭头
+          className="list-none w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-600 rounded-full hover:bg-gray-200 hover:scale-[1.05] transition-transform"
         >
-          <div className="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-600 rounded-full hover:bg-gray-200 hover:scale-[1.05] transition-transform">
-            <img 
-              src={session.user.image}
-              className="w-10 h-10 rounded-full object-cover object-center"
-              alt="avatar"
-            />
-          </div>
+          <img 
+            src={session.user.image}
+            className="w-10 h-10 rounded-full object-cover object-center"
+            alt="avatar"
+          />
         </summary>
  
         {/* 下拉内容 */}

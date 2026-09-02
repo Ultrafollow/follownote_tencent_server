@@ -40,6 +40,8 @@ export default function Pagination({ currentPage, totalPages, user }) {
 
       <div className="flex items-center gap-2 mx-4">
         <input
+          id="pageInput"
+          name="page"
           type="text"
           value={inputPage}
           onChange={handleInputChange}

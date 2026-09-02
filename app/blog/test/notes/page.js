@@ -67,6 +67,8 @@ export default function NotesPage() {
       <h2>我的笔记</h2>
       <div style={{ marginBottom: 16 }}>
         <input
+          id="newNote"
+          name="newNote"
           value={content}
           onChange={e => setContent(e.target.value)}
           placeholder="输入新笔记内容"
@@ -79,6 +81,8 @@ export default function NotesPage() {
         {notes.map(note => (
           <li key={note.id} style={{ marginBottom: 8 }}>
             <input
+              id={`note-${note.id}`}
+              name={`note-${note.id}`}
               style={{ width: 300, marginRight: 8 }}
               defaultValue={note.content}
               onBlur={e => updateNote(note.id, e.target.value)}

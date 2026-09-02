@@ -5,6 +5,8 @@ export default function Search({ value, onChange }) {
   return (
     <div className="relative max-w-2xl">
       <input
+        id="search"
+        name="search"
         type="text"
         placeholder="Search..."
         value={value}
